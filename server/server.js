@@ -32,7 +32,7 @@ app.disable('x-powered-by'); // Hide Express info from headers
 // === CORS & Parsing Middleware ===
 app.use(
     cors({
-        origin: process.env.FRONTEND_DOMAIN,
+        origin: process.env.REACT_APP_DOMAIN,
         credentials: true,
     })
 );
@@ -48,7 +48,7 @@ app.use('/auth', authRoutes);
 
 // === Root Route ===
 app.get('/', (req, res) => {
-    res.send(`<h3>✅ Server is running in ${process.env.NODE_ENV || 'development'} mode</h3>`);
+    res.send(`<h3> Server is running in ${process.env.NODE_ENV || 'development'} mode</h3>`);
 });
 
 // === 404 + Error Handling Middleware ===
@@ -68,12 +68,12 @@ if (process.env.NODE_ENV === 'development') {
         cert: fs.readFileSync('./certs/cert.pem'),
     };
 
-    https.createServer(sslOptions, app).listen(443, () => {
-        console.log(`\n✅ HTTPS Dev Server running at https://localhost`);
+    https.createServer(sslOptions, app).listen(PORT, "0.0.0.0", () => {
+        console.log(`\n✅ HTTPS Dev Server running at https://localhost:${PORT}`);
     });
 
 } else {
-    app.listen(PORT, () => {
+    app.listen(PORT, "0.0.0.0", () => {
         console.log(`\n🚀 Production server running on port ${PORT}`);
     });
 }

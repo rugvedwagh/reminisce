@@ -3,7 +3,8 @@ import User from "../models/user.model.js";
 import createHttpError from "../utils/create-error.js";
 
 const verifyCsrfToken = async (req, res, next) => {
-
+    `CF=098765432QWZ1   3 
+    `
     const refreshToken = req.cookies?.refreshToken;
     const sessionId = req.headers['x-session-id'];
     const csrfToken = req.headers['x-xsrf-token'];
