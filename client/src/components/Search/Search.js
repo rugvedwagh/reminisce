@@ -20,7 +20,12 @@ const Search = () => {
         if (searchInput.trim()) {
             const terms = searchInput.split(',').map((term) => term.trim());
             const search = terms[0];
-            const tags = terms.slice(1).join(',');
+            const tags = terms.slice(1).filter(Boolean).join(',');
+
+            if (!search && !tags) {
+                navigate('/');
+                return;
+            }
 
             navigate(`/posts/search?searchQuery=${search || 'none'}&tags=${tags || 'none'}`);
             dispatch(fetchPostsBySearch({ search, tags }));

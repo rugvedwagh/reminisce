@@ -7,12 +7,14 @@ import {
     START_LOADING,
     END_LOADING
 } from '../../constants/loading.constants';
+import { BOOKMARK_POST } from '../../constants/post.constants';
 import { fetchUserProfile } from '../../utils/storage';
 
 const initialState = {
     authData: null,
     clientData: null,
-    isLoading: null,
+    isLoading: false,
+    loadingCount: 0,
     errorMessage: null
 }
 
@@ -38,10 +40,22 @@ const userReducer = (state = initialState, action) => {
 
             return {
                 ...state,
-                clientData: updatedAuthData,
+                clientData: {
+                    ...state.clientData,
+                    ...updatedAuthData,
+                },
                 errorMessage: ''
             };
         }
+
+        case BOOKMARK_POST:
+            return {
+                ...state,
+                clientData: {
+                    ...state.clientData,
+                    bookmarks: action.payload.bookmarks,
+                },
+            };
 
         case ERROR:
             return {
@@ -49,17 +63,17 @@ const userReducer = (state = initialState, action) => {
                 errorMessage: action.payload
             };
 
-        case START_LOADING:
-            return {
-                ...state,
-                isLoading: true
-            };
+        case START_LOADING: {
+            if (action.payload !== 'user') return state;
+            const loadingCount = (state.loadingCount || 0) + 1;
+            return { ...state, loadingCount, isLoading: loadingCount > 0 };
+        }
 
-        case END_LOADING:
-            return {
-                ...state,
-                isLoading: false
-            };
+        case END_LOADING: {
+            if (action.payload !== 'user') return state;
+            const loadingCount = Math.max(0, (state.loadingCount || 0) - 1);
+            return { ...state, loadingCount, isLoading: loadingCount > 0 };
+        }
 
         default:
             return state;

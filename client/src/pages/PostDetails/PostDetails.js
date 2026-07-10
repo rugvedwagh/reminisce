@@ -51,8 +51,8 @@ const PostDetails = () => {
 
 
     useEffect(() => {
-        if (post) {
-            dispatch(fetchPostsBySearch({ search: "none", tags: post?.tags.join(",") }))
+        if (post?.tags?.length) {
+            dispatch(fetchPostsBySearch({ search: "none", tags: post.tags.join(",") }))
         }
         setTimeout(() => {
             heroSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })

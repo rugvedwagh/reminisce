@@ -16,7 +16,8 @@ const initialState = {
     authData: null,
     accessToken: null,
     clientData: null,
-    isLoading: null,
+    isLoading: false,
+    loadingCount: 0,
     successMessage: null,
     errorMessage: null
 }
@@ -72,17 +73,17 @@ const authReducer = (state = initialState, action) => {
                 successMessage: ''
             };
 
-        case START_LOADING:
-            return {
-                ...state,
-                isLoading: true
-            };
+        case START_LOADING: {
+            if (action.payload !== 'auth') return state;
+            const loadingCount = (state.loadingCount || 0) + 1;
+            return { ...state, loadingCount, isLoading: loadingCount > 0 };
+        }
 
-        case END_LOADING:
-            return {
-                ...state,
-                isLoading: false
-            };
+        case END_LOADING: {
+            if (action.payload !== 'auth') return state;
+            const loadingCount = Math.max(0, (state.loadingCount || 0) - 1);
+            return { ...state, loadingCount, isLoading: loadingCount > 0 };
+        }
 
         default:
             return state;

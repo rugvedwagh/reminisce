@@ -30,76 +30,66 @@ import { ERROR, SUCCESS_MESSAGE } from '../../constants/auth.constants';
 
 const fetchPost = (slug, id) => async (dispatch) => {
     try {
-        dispatch({ type: START_LOADING });
+        dispatch({ type: START_LOADING, payload: 'posts' });
         const { data } = await fetchPostApi(slug, id);
         dispatch({ type: FETCH_POST, payload: data });
     } catch (error) {
         dispatch({ type: ERROR, payload: error?.response?.data?.message });
     } finally {
-        dispatch({ type: END_LOADING });
+        dispatch({ type: END_LOADING, payload: 'posts' });
     }
 };
 
-const fetchPosts = (page) => async (dispatch, getState) => {
+const fetchPosts = (page) => async (dispatch) => {
     try {
-        dispatch({ type: START_LOADING });
-        const cachedPosts = JSON.parse(localStorage.getItem('cachedPosts')) || {
-            posts: [],
-            pages: {},
-            numberOfPages: 0
-        };
+        dispatch({ type: START_LOADING, payload: 'posts' });
+        const {
+            data: {
+                data,
+                currentPage,
+                numberOfPages
+            }
+        } = await fetchPostsApi(page);
 
-        if (cachedPosts.pages[page]) {
-            dispatch({
-                type: FETCH_ALL,
-                payload: {
-                    data: cachedPosts.posts,
-                    currentPage: page,
-                    numberOfPages: cachedPosts.numberOfPages,
-                }
-            });
-        }
-        else {
-            const {
-                data: {
-                    data,
-                    currentPage,
-                    numberOfPages
-                }
-            } = await fetchPostsApi(page);
-
-            const updatedPosts = [...cachedPosts.posts, ...data];
-            const updatedPages = { ...cachedPosts.pages, [page]: true };
-
-            localStorage.setItem(
-                'cachedPosts',
-                JSON.stringify({
-                    posts: updatedPosts,
-                    pages: updatedPages,
-                    numberOfPages,
-                })
-            );
-
-            dispatch({
-                type: FETCH_ALL,
-                payload: {
-                    data: updatedPosts,
-                    currentPage,
-                    numberOfPages
-                }
-            });
-        }
+        dispatch({
+            type: FETCH_ALL,
+            payload: {
+                data,
+                currentPage,
+                numberOfPages
+            }
+        });
     } catch (error) {
         dispatch({ type: ERROR, payload: error?.response?.data?.message });
     } finally {
-        dispatch({ type: END_LOADING });
+        dispatch({ type: END_LOADING, payload: 'posts' });
     }
 };
 
 const fetchPostsBySearch = (searchQuery) => async (dispatch) => {
+    const search = typeof searchQuery?.search === 'string'
+        ? searchQuery.search.trim()
+        : '';
+    const tags = (Array.isArray(searchQuery?.tags)
+        ? searchQuery.tags
+        : typeof searchQuery?.tags === 'string'
+            ? searchQuery.tags.split(',')
+            : [])
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+        .join(',');
+    const hasSearchTerm = search && search.toLowerCase() !== 'none';
+    const hasTags = tags && tags.toLowerCase() !== 'none';
+
+    // Do not send a search request when neither a name nor a tag was provided.
+    if (!hasSearchTerm && !hasTags) return;
+
     try {
-        dispatch({ type: START_LOADING });
-        const { data: { data } } = await fetchPostsBySearchApi(searchQuery);
+        dispatch({ type: START_LOADING, payload: 'posts' });
+        const { data: { data } } = await fetchPostsBySearchApi({
+            search: hasSearchTerm ? search : 'none',
+            tags: hasTags ? tags : 'none',
+        });
         dispatch({ type: FETCH_BY_SEARCH, payload: data });
         dispatch({ type: SUCCESS_MESSAGE, payload: "Found some posts matching your query" })
     } catch (error) {
@@ -112,16 +102,14 @@ const fetchPostsBySearch = (searchQuery) => async (dispatch) => {
             console.error(error);
         }
     } finally {
-        dispatch({ type: END_LOADING });
+        dispatch({ type: END_LOADING, payload: 'posts' });
     }
 };
 
 const createPost = (post) => async (dispatch) => {
     try {
-        dispatch({ type: START_LOADING });
+        dispatch({ type: START_LOADING, payload: 'posts' });
         const { data } = await createPostApi(post);
-
-        localStorage.removeItem('cachedPosts');
 
         dispatch({ type: CREATE, payload: data });
         dispatch({ type: SUCCESS_MESSAGE, payload: "Post created successfully" })
@@ -129,16 +117,14 @@ const createPost = (post) => async (dispatch) => {
         dispatch({ type: ERROR, payload: error?.response?.data?.message });
         console.error(error);
     } finally {
-        dispatch({ type: END_LOADING });
+        dispatch({ type: END_LOADING, payload: 'posts' });
     }
 };
 
 const updatePost = (id, post) => async (dispatch) => {
     try {
-        dispatch({ type: START_LOADING });
+        dispatch({ type: START_LOADING, payload: 'posts' });
         const { data } = await updatePostApi(id, post);
-
-        localStorage.removeItem('cachedPosts');
 
         dispatch({ type: UPDATE, payload: data });
         dispatch({ type: SUCCESS_MESSAGE, payload: "Post updated successfully" })
@@ -146,13 +132,13 @@ const updatePost = (id, post) => async (dispatch) => {
         dispatch({ type: ERROR, payload: error?.response?.data?.message });
         console.error(error);
     } finally {
-        dispatch({ type: END_LOADING });
+        dispatch({ type: END_LOADING, payload: 'posts' });
     }
 };
 
 const deletePost = (id) => async (dispatch) => {
     try {
-        dispatch({ type: START_LOADING });
+        dispatch({ type: START_LOADING, payload: 'posts' });
         await deletePostApi(id);
         dispatch({ type: DELETE, payload: id });
         dispatch({ type: SUCCESS_MESSAGE, payload: "Post deleted successfully" })
@@ -160,7 +146,7 @@ const deletePost = (id) => async (dispatch) => {
         dispatch({ type: ERROR, payload: error?.response?.data?.message });
         console.error(error);
     } finally {
-        dispatch({ type: END_LOADING });
+        dispatch({ type: END_LOADING, payload: 'posts' });
     }
 };
 
@@ -176,7 +162,7 @@ const likePost = (id) => async (dispatch) => {
 
 const addComment = (value, id) => async (dispatch) => {
     try {
-        dispatch({ type: START_LOADING });
+        dispatch({ type: START_LOADING, payload: 'posts' });
         const { data } = await addCommentApi(value, id);
         dispatch({ type: COMMENT, payload: data });
         return data.comments;
@@ -185,7 +171,7 @@ const addComment = (value, id) => async (dispatch) => {
         console.error(error);
     }
     finally {
-        dispatch({ type: END_LOADING });
+        dispatch({ type: END_LOADING, payload: 'posts' });
     }
 };
 

@@ -20,7 +20,7 @@ import {
 } from '../../api/auth.api';
 
 const logIn = (formData, navigate) => async (dispatch) => {
-    dispatch({ type: START_LOADING });
+    dispatch({ type: START_LOADING, payload: 'auth' });
 
     try {
         const { data } = await logInApi(formData);
@@ -37,13 +37,13 @@ const logIn = (formData, navigate) => async (dispatch) => {
         dispatch({ type: ERROR, payload: message });
         console.error(error);
     } finally {
-        dispatch({ type: END_LOADING });
+        dispatch({ type: END_LOADING, payload: 'auth' });
     }
 };
 
 const register = (formData, navigate) => async (dispatch) => {
     try {
-        dispatch({ type: START_LOADING });
+        dispatch({ type: START_LOADING, payload: 'auth' });
 
         const { data } = await registerApi(formData);
         const { csrfToken, sessionId } = data;
@@ -58,16 +58,15 @@ const register = (formData, navigate) => async (dispatch) => {
         dispatch({ type: ERROR, payload: error?.response?.data?.message });
         console.error(error);
     } finally {
-        dispatch({ type: END_LOADING });
+        dispatch({ type: END_LOADING, payload: 'auth' });
     }
 };
 
 const Logout = () => async (dispatch) => {
     try {
-        dispatch({ type: START_LOADING });
+        dispatch({ type: START_LOADING, payload: 'auth' });
         await logoutApi();
         localStorage.removeItem('profile');
-        localStorage.removeItem('cachedPosts');
         localStorage.removeItem('csrfToken');
         localStorage.removeItem('sessionId');
         dispatch({ type: LOGOUT });
@@ -76,7 +75,7 @@ const Logout = () => async (dispatch) => {
         dispatch({ type: ERROR, payload: error?.response?.data?.message });
         console.error(error);
     } finally {
-        dispatch({ type: END_LOADING });
+        dispatch({ type: END_LOADING, payload: 'auth' });
     }
 };
 

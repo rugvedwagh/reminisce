@@ -74,6 +74,11 @@ const App = () => {
         };
     }, [errorMessage, successMessage, dispatch]);
 
+    // Remove the legacy post cache now that Redux Persist owns post persistence.
+    useEffect(() => {
+        localStorage.removeItem('cachedPosts');
+    }, []);
+
     // --- Refresh access token if missing or expired ---
     useEffect(() => {
         const refreshAccessTokenIfNeeded = async () => {

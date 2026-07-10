@@ -3,6 +3,7 @@ import { Grid, Typography } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchPosts } from '../../redux/actions/post.actions.js';
+import { fetchUserData } from '../../redux/actions/user.actions.js';
 import { fetchUserProfile } from '../../utils/storage.js';
 import { useTheme } from '../../context/themeContext.js';
 import PostCard from '../PostCard/PostCard.js'
@@ -24,6 +25,12 @@ const Posts = ({ setCurrentId }) => {
     useEffect(() => {
         dispatch(fetchPosts(currentPage));
     }, [currentPage, dispatch, userId]);
+
+    useEffect(() => {
+        if (userId && !clientData) {
+            dispatch(fetchUserData(userId));
+        }
+    }, [clientData, dispatch, userId]);
 
     const fetchMorePosts = useCallback(() => {
         if (currentPage < numberOfPages) {
