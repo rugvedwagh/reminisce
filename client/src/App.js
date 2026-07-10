@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, Suspense, lazy } from 'react';
-import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { isAccessTokenExpired } from './utils/check-token-expiry';
@@ -27,7 +27,6 @@ const App = () => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const location = useLocation();
 
     const darkMode = useTheme();
     const profile = fetchUserProfile();
@@ -41,12 +40,10 @@ const App = () => {
     const [show, setShow] = useState(true);
     const [showSuccess, setShowSuccess] = useState(false);
 
-    const isValidErrorAlertCondition =
-        errorMessage &&
-        show &&
-        !errorMessage.includes("Token") &&
-        !((errorMessage.includes("Session") || errorMessage.includes("Invalid")) && 
-        ((errorMessage.includes("No posts found") && location.pathname === '/posts/:slug')));
+    // Session and CSRF details are implementation-specific and actionable only
+    // to developers, so do not expose them in the user-facing error toast.
+    const isTechnicalSessionError = /session\s*id|csrf\s*token/i.test(errorMessage || '');
+    const isValidErrorAlertCondition = Boolean(errorMessage && show && !isTechnicalSessionError);
 
     const isValidSuccessMessage =
         successMessage &&

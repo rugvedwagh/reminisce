@@ -71,7 +71,7 @@ const Logout = () => async (dispatch) => {
         localStorage.removeItem('csrfToken');
         localStorage.removeItem('sessionId');
         dispatch({ type: LOGOUT });
-        dispatch({ type: SUCCESS_MESSAGE, payload: "Logged out successfully" })
+        // dispatch({ type: SUCCESS_MESSAGE, payload: "Logged out successfully" })
     } catch (error) {
         dispatch({ type: ERROR, payload: error?.response?.data?.message });
         console.error(error);

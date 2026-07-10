@@ -103,8 +103,14 @@ const fetchPostsBySearch = (searchQuery) => async (dispatch) => {
         dispatch({ type: FETCH_BY_SEARCH, payload: data });
         dispatch({ type: SUCCESS_MESSAGE, payload: "Found some posts matching your query" })
     } catch (error) {
-        dispatch({ type: ERROR, payload: error?.response?.data?.message });
-        console.error(error);
+        // The API responds with 404 when a valid search has no matching posts.
+        // Keep the empty state quiet rather than showing an error toast.
+        if (error?.response?.status === 404) {
+            dispatch({ type: FETCH_BY_SEARCH, payload: [] });
+        } else {
+            dispatch({ type: ERROR, payload: error?.response?.data?.message });
+            console.error(error);
+        }
     } finally {
         dispatch({ type: END_LOADING });
     }
