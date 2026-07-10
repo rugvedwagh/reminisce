@@ -9,6 +9,7 @@
 
 # Node modules (since you are in a webdev folder)
 node_modules/
+flicklog-spring/
 
 # OS generated files
 .DS_Store
